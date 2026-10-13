@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Calculadora web moderna y profesional con glassmorphism, partículas y animaciones premium." />
+  <title>Calculadora Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Custom cursor -->
+  <div id="cursor"      aria-hidden="true"></div>
+  <div id="cursor-ring" aria-hidden="true"></div>
+
+  <!-- Particle canvas -->
+  <canvas id="particleCanvas" aria-hidden="true"></canvas>
+
+  <!-- Background layers -->
+  <div class="bg-mesh"  aria-hidden="true"></div>
+  <div class="bg-orb bg-orb--1" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb--2" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb--3" aria-hidden="true"></div>
+
+  <div class="app-wrapper">
+    <main class="calculator" role="main" aria-label="Calculadora">
+
+      <!-- Mode toggle -->
+      <div class="mode-bar">
+        <span class="mode-label">Calculadora</span>
+        <button
+          class="mode-toggle"
+          id="modeToggle"
+          aria-pressed="false"
+          aria-label="Activar modo científico"
+          title="Modo científico"
+        >
+          <span class="mode-toggle__icon">𝑓(𝑥)</span>
+          <span class="mode-toggle__text">Científica</span>
+        </button>
+      </div>
+
+      <!-- Display -->
+      <section class="display" aria-live="polite" aria-atomic="true">
+        <div class="display__expression" id="expression" aria-label="Expresión actual"></div>
+        <div class="display__result"     id="result"     aria-label="Resultado">0</div>
+        <div class="display__info"       id="displayInfo"></div>
+      </section>
+
+      <!-- Scientific panel (hidden by default) -->
+      <div class="sci-panel" id="sciPanel" aria-hidden="true">
+        <div class="sci-row">
+          <button class="btn btn--sci" id="btnSin"  data-action="sci" data-fn="sin"   aria-label="Seno">sin</button>
+          <button class="btn btn--sci" id="btnCos"  data-action="sci" data-fn="cos"   aria-label="Coseno">cos</button>
+          <button class="btn btn--sci" id="btnTan"  data-action="sci" data-fn="tan"   aria-label="Tangente">tan</button>
+          <button class="btn btn--sci" id="btnLog"  data-action="sci" data-fn="log"   aria-label="Logaritmo base 10">log</button>
+          <button class="btn btn--sci" id="btnLn"   data-action="sci" data-fn="ln"    aria-label="Logaritmo natural">ln</button>
+        </div>
+        <div class="sci-row">
+          <button class="btn btn--sci" id="btnSqrt" data-action="sci" data-fn="sqrt"  aria-label="Raíz cuadrada">√</button>
+          <button class="btn btn--sci" id="btnPow2" data-action="sci" data-fn="pow2"  aria-label="Al cuadrado">x²</button>
+          <button class="btn btn--sci" id="btnPowY" data-action="sci" data-fn="powy"  aria-label="Potencia">xʸ</button>
+          <button class="btn btn--sci" id="btnPi"   data-action="sci" data-fn="pi"    aria-label="Pi">π</button>
+          <button class="btn btn--sci" id="btnE"    data-action="sci" data-fn="euler" aria-label="Número de Euler">e</button>
+        </div>
+      </div>
+
+      <!-- Main keypad -->
+      <div class="keypad" id="keypad">
+
+        <!-- Row 1 -->
+        <button class="btn btn--utility" id="btnAC"         data-action="reset"    aria-label="Borrar todo">AC</button>
+        <button class="btn btn--utility" id="btnCE"         data-action="clear"    aria-label="Borrar entrada">CE</button>
+        <button class="btn btn--utility" id="btnDel"        data-action="delete"   aria-label="Borrar dígito">⌫</button>
+        <button class="btn btn--operator" id="btnDiv"       data-action="operator" data-op="÷" aria-label="Dividir">÷</button>
+
+        <!-- Row 2 -->
+        <button class="btn btn--number"  id="btn7"          data-action="digit"    data-digit="7">7</button>
+        <button class="btn btn--number"  id="btn8"          data-action="digit"    data-digit="8">8</button>
+        <button class="btn btn--number"  id="btn9"          data-action="digit"    data-digit="9">9</button>
+        <button class="btn btn--operator" id="btnMul"       data-action="operator" data-op="×" aria-label="Multiplicar">×</button>
+
+        <!-- Row 3 -->
+        <button class="btn btn--number"  id="btn4"          data-action="digit"    data-digit="4">4</button>
+        <button class="btn btn--number"  id="btn5"          data-action="digit"    data-digit="5">5</button>
+        <button class="btn btn--number"  id="btn6"          data-action="digit"    data-digit="6">6</button>
+        <button class="btn btn--operator" id="btnSub"       data-action="operator" data-op="−" aria-label="Restar">−</button>
+
+        <!-- Row 4 -->
+        <button class="btn btn--number"  id="btn1"          data-action="digit"    data-digit="1">1</button>
+        <button class="btn btn--number"  id="btn2"          data-action="digit"    data-digit="2">2</button>
+        <button class="btn btn--number"  id="btn3"          data-action="digit"    data-digit="3">3</button>
+        <button class="btn btn--operator" id="btnAdd"       data-action="operator" data-op="+" aria-label="Sumar">+</button>
+
+        <!-- Row 5 -->
+        <button class="btn btn--utility" id="btnNeg"        data-action="negate"   aria-label="Cambiar signo">+/−</button>
+        <button class="btn btn--number"  id="btn0"          data-action="digit"    data-digit="0">0</button>
+        <button class="btn btn--number"  id="btnDot"        data-action="decimal"  aria-label="Decimal">.</button>
+        <button class="btn btn--equals"  id="btnEquals"     data-action="equals"   aria-label="Calcular">=</button>
+
+        <!-- Row 6 -->
+        <button class="btn btn--utility btn--wide" id="btnPct"        data-action="percent"               aria-label="Porcentaje">%</button>
+        <button class="btn btn--utility"           id="btnParenOpen"  data-action="paren" data-paren="("  aria-label="Abre paréntesis">(</button>
+        <button class="btn btn--utility"           id="btnParenClose" data-action="paren" data-paren=")"  aria-label="Cierra paréntesis">)</button>
+
+      </div>
+
+      <!-- Keyboard hint -->
+      <footer class="hint" aria-label="Atajos de teclado">
+        <span>⌨ Teclado activo &nbsp;·&nbsp; <kbd>Esc</kbd> reinicia &nbsp;·&nbsp; <kbd>Backspace</kbd> borra</span>
+      </footer>
+
+    </main>
+  </div>
+
+  <script src="calculator.js"></script>
+  <script src="effects.js"></script>
+</body>
+</html>
